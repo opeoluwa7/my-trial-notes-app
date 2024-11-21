@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:myapp/auth/firebase_auth.dart';
+import 'package:myapp/auth/firebase_service.dart';
 import 'package:myapp/auth/notes_firestore.dart';
 import 'package:myapp/pages/add_note_page.dart';
 import 'package:myapp/pages/login_or_register.dart';
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final FirestoreService firestoreService = FirestoreService();
   final BaseAuth auth = BaseAuth();
   final NoteService noteService = NoteService();
   final PageController pageController = PageController();
@@ -26,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     pages = [
-       NotesPage(
+      NotesPage(
         noteService: noteService,
       ),
       AddNotePage(onNoteSaved: () {
@@ -36,7 +38,9 @@ class _HomePageState extends State<HomePage> {
               curve: Curves.easeInOut);
         });
       }),
-      const ProfilePage(),
+      ProfilePage(
+        firestoreService: firestoreService,
+      ),
     ];
   }
 
@@ -44,14 +48,6 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     pageController.dispose();
     super.dispose();
-  }
-
-  Future<void> signUserOut() async {
-    await auth.signOut();
-    if (mounted) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const LoginOrRegister()));
-    }
   }
 
   @override
@@ -70,7 +66,7 @@ class _HomePageState extends State<HomePage> {
             type: BottomNavigationBarType.fixed,
             fixedColor: Colors.white,
             unselectedItemColor: Colors.grey,
-            iconSize: 30,
+            iconSize: 28,
             currentIndex: selectedIndex,
             onTap: (int index) {
               setState(() {

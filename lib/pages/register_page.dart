@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/auth/firebase_auth.dart';
@@ -25,11 +27,25 @@ class _RegisterPageState extends State<RegisterPage> {
   final BaseAuth auth = BaseAuth();
   final _formKey = GlobalKey<FormState>();
   final FirestoreService firestoreService = FirestoreService();
+  final FocusNode firstNameFocusNode = FocusNode();
+  final FocusNode lastNameFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
+  final FocusNode confirmPasswordFocusNode = FocusNode();
 
-  String firstName = '';
-  String lastName = '';
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    super.dispose();
+  }
 
   void signUpUser() async {
+    String firstName;
+    String lastName;
     String email = emailController.text;
     String password = passwordController.text;
     firstName = firstNameController.text;
@@ -42,10 +58,10 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         await auth.createUser(email, password, firstName, lastName);
         firestoreService.addUser(userData);
-       if(mounted) {
-         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const HomePage()));
-       }
+        if (mounted) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const HomePage()));
+        }
       } on FirebaseAuthException catch (e) {
         String errorMessage;
         switch (e.code) {
@@ -56,16 +72,21 @@ class _RegisterPageState extends State<RegisterPage> {
             errorMessage = "This email, is already in use";
             break;
           default:
-            debugPrint('Unexpected Firebase Authentication Error Code: ${e.code}');
+            debugPrint(
+                'Unexpected Firebase Authentication Error Code: ${e.code}');
             errorMessage = "An undefined Error happened";
         }
         if (mounted) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(errorMessage: errorMessage);
-            },
-          );
+          try {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ErrorDialog(errorMessage: errorMessage);
+              },
+            );
+          } catch (e) {
+            print('Error displaying dialog: $e');
+          }
         }
       }
     }
@@ -120,6 +141,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 50),
                 //First name
                 MyTextField(
+                  focusNode: firstNameFocusNode,
                   controller: firstNameController,
                   hintText: 'Enter your first name...',
                   labelText: 'First Name',
@@ -129,6 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 10),
                 //Last name
                 MyTextField(
+                  focusNode: lastNameFocusNode,
                   controller: lastNameController,
                   hintText: 'Enter your last name...',
                   labelText: 'Last Name',
@@ -138,6 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 10),
                 //Email
                 MyTextField(
+                  focusNode: emailFocusNode,
                   controller: emailController,
                   hintText: 'Enter your email...',
                   labelText: 'Email',
@@ -147,6 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 10),
                 //Password
                 MyTextField(
+                  focusNode: passwordFocusNode,
                   controller: passwordController,
                   hintText: 'Enter your password...',
                   labelText: 'Password',
@@ -156,6 +181,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 10),
                 //Confirm Password
                 MyTextField(
+                  focusNode: confirmPasswordFocusNode,
                   controller: confirmPasswordController,
                   hintText: 'Confirm your password...',
                   labelText: 'Confirm Password',
@@ -166,6 +192,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 //Sign up button
                 MyButton(
+                  color: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 1),
+                  textColor: Colors.black,
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       signUpUser();

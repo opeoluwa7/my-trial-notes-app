@@ -1,4 +1,4 @@
-
+// ignore_for_file: avoid_print
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +22,31 @@ class _LoginPageState extends State<LoginPage> {
   final BaseAuth auth = BaseAuth();
   final _formKey = GlobalKey<FormState>();
   String errorMessage = "";
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
+
+@override
+void initState() {
+  super.initState();
+  emailFocusNode.addListener(_onFocusChange);
+  passwordFocusNode.addListener(_onFocusChange);
+}
+
+@override
+void dispose() {
+  emailFocusNode.removeListener(_onFocusChange);
+  passwordFocusNode.removeListener(_onFocusChange);
+  emailFocusNode.dispose();
+  passwordFocusNode.dispose();
+  emailController.dispose();
+  passwordController.dispose();
+  super.dispose();
+}
+
+void _onFocusChange() {
+  print('Email Focus: ${emailFocusNode.hasFocus}');
+  print('Password Focus: ${passwordFocusNode.hasFocus}');
+}
 
   void signInUser() async {
     String email = emailController.text;
@@ -84,6 +109,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+     print("LoginPage widget is rebuilding");
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
@@ -104,6 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 50),
                 //Email
                 MyTextField(
+                  focusNode: emailFocusNode,
                   controller: emailController,
                   hintText: 'Enter your email...',
                   labelText: 'Email',
@@ -113,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 20),
                 //Password
                 MyTextField(
+                  focusNode: passwordFocusNode,
                   controller: passwordController,
                   hintText: 'Enter your password...',
                   labelText: 'Password',
@@ -122,6 +150,9 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 30),
                 //Login button
                 MyButton(
+                  color: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 1),
+                  textColor: Colors.black,
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       signInUser();

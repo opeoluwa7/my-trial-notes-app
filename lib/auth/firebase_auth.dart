@@ -46,14 +46,10 @@ class BaseAuth {
 
   // delete account
   Future deleteUser() async {
-    try {
+    final uid = auth.currentUser!.uid;
       //this deletes the actual user account from firebase auth
       await auth.currentUser!.delete();
 
-      await firestoreService.deleteProfileData(auth.currentUser!.uid);
-    } catch (e) {
-      debugPrint('Error deleting account: $e');
-      rethrow;
-    }
+      await firestoreService.deleteProfileData(uid);
   }
 }

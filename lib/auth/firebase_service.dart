@@ -9,25 +9,24 @@ class FirestoreService {
 
   // to add users
   Future<void> addUser(UserData user) async {
-    //convert the userdata object into a map
+    final currentUser = auth.currentUser;
+  if (currentUser != null) {
+    // Convert the UserData object into a map
     Map<String, dynamic> userData = user.toMap();
 
-    await users.add(userData);
+    // Use the Firebase Auth UID as the document ID
+    await users.doc(currentUser.uid).set(userData);
+  }
   }
 
   //get the users data from firebase
   Future<UserData?> fetchUserData(String userId) async {
-    //this gets each doc data
-    DocumentSnapshot snapshot = await users.doc(userId).get();
+    final DocumentSnapshot documentSnapshot = await users.doc(userId).get();
 
-    if (snapshot.exists) {
-      //because the doc exists as a map, it must be gotten back as well the same way before it can be converted
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-
-      //this creates an object that can be used to store the data gotten from firebase
-      UserData userData = UserData.fromMap(data);
-      //this returns the object so it can be displayed and used
-      return userData;
+  if (documentSnapshot.exists) {
+    // Map the document data to the UserData object
+    Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+    return UserData.fromMap(data);
     } else {
       return null;
     }
