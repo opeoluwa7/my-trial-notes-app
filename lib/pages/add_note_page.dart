@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/auth/notes_data.dart';
-import 'package:myapp/auth/notes_firestore.dart';
+import 'package:myapp/models/note_model.dart';
+import 'package:myapp/providers/db_provider.dart';
 import 'package:myapp/util/two_tiles.dart';
+import 'package:provider/provider.dart';
 
 class AddNotePage extends StatefulWidget {
   final VoidCallback onNoteSaved;
@@ -16,17 +18,41 @@ class AddNotePage extends StatefulWidget {
 }
 
 class _AddNotePageState extends State<AddNotePage> {
-  final NoteService noteService = NoteService();
   final FocusNode titleFocusNode = FocusNode();
   final FocusNode contentFocusNode = FocusNode();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void dispose() {
     super.dispose();
     titleController.dispose();
     contentController.dispose();
+    titleFocusNode.dispose();
+    contentFocusNode.dispose();
+  }
+
+  void onAddNote() async {
+    String noteId = FirebaseFirestore.instance.collection("Notes").doc().id;
+    Timestamp timestamp = Timestamp.now();
+    NoteModel notes = NoteModel(
+        id: noteId,
+        title: titleController.text,
+        content: contentController.text,
+        timestamp: timestamp);
+    try {
+      await context.read<DbProvider>().createNote(notes, currentUser!.uid);
+      titleController.clear();
+      contentController.clear();
+      widget.onNoteSaved();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  void onExit() {
+    widget.onNoteSaved();
   }
 
   @override
@@ -49,30 +75,9 @@ class _AddNotePageState extends State<AddNotePage> {
               automaticallyImplyLeading: true,
               centerTitle: true,
               actions: [
+                IconButton(onPressed: onExit, icon: const Icon(Icons.close)),
                 IconButton(
-                    onPressed: () {
-                      widget.onNoteSaved();
-                    },
-                    icon: const Icon(Icons.close)),
-                IconButton(
-                    onPressed: () async {
-                      String noteId = FirebaseFirestore.instance
-                          .collection("Notes")
-                          .doc()
-                          .id;
-                      Timestamp timestamp = Timestamp.now();
-                      Notes notes = Notes(
-                          id: noteId,
-                          title: titleController.text,
-                          content: contentController.text,
-                          timestamp: timestamp);
-                      try {
-                        await noteService.addNotes(notes);
-                        widget.onNoteSaved();
-                      } catch (e) {
-                        rethrow;
-                      }
-                    },
+                    onPressed: onAddNote,
                     icon: const Icon(Icons.save_alt_outlined)),
               ],
             ),

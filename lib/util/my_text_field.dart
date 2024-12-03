@@ -7,19 +7,18 @@ class MyTextField extends StatelessWidget {
       required this.hintText,
       required this.labelText,
       this.obscureText = false,
-      this.validator, this.focusNode});
+      this.focusNode});
   final TextEditingController controller;
   final String hintText;
   final String labelText;
   final bool obscureText;
-  final String? Function(String?)? validator;
   final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: TextFormField(
+      child: TextField(
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(fontSize: 13, color: Colors.grey[700]),
@@ -37,7 +36,6 @@ class MyTextField extends StatelessWidget {
           filled: true,
         ),
         controller: controller,
-        validator: validator,
         obscureText: obscureText,
         focusNode: focusNode,
       ),

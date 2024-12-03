@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/auth/notes_data.dart';
-import 'package:myapp/auth/notes_firestore.dart';
+import 'package:myapp/models/note_model.dart';
 import 'package:myapp/pages/edit_page.dart';
+import 'package:myapp/providers/db_provider.dart';
 
 class NoteTile extends StatelessWidget {
-  const NoteTile(
+  NoteTile(
       {super.key,
       required int index,
       required int extent,
@@ -13,54 +13,59 @@ class NoteTile extends StatelessWidget {
       required this.content,
       required this.titleController,
       required this.contentController,
-      required this.noteService,
-      required this.noteId});
+      required this.noteId,
+      required this.note});
   final String title;
   final String content;
   final TextEditingController titleController;
   final TextEditingController contentController;
-  final NoteService noteService;
   final String noteId;
+  final NoteModel note;
+  final currentUser = FirebaseAuth.instance.currentUser;
+
+  Future onTapFunction(context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditPage(
+          noteId: noteId,
+          contentController: contentController,
+          onNoteSaved: () {
+            Navigator.pop(context);
+          },
+          titleController: titleController,
+        ),
+      ),
+    );
+  }
+
+  void deleteNote(context) {
+    context.read<DbProvider>().deleteNote(currentUser!.uid, noteId, note);
+  }
+
+  void lpFunction(context)  {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.grey[400],
+        content: Row(
+          children: [
+            const Text(
+              'Files deleted will be permanently removed',
+              style: TextStyle(color: Colors.black),
+            ),
+            IconButton(
+                onPressed: () => deleteNote(context),
+                icon: const Icon(Icons.delete, color: Colors.black, size: 20))
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => EditPage(
-                  noteId: noteId,
-                  noteService: noteService,
-                  contentController: contentController,
-                  onNoteSaved: () {
-                    Navigator.pop(context);
-                  },
-                  titleController: titleController,
-                )));
-      },
-      onLongPress: () async {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            backgroundColor: Colors.grey[400],
-            content: Row(
-              children: [
-                const Text(
-                  'Files deleted will be permanently removed',
-                  style: TextStyle(color: Colors.black),
-                ),
-                IconButton(
-                    onPressed: () {
-                      Timestamp timestamp = Timestamp.now();
-                      Notes noteToDelete = Notes(
-                          id: noteId,
-                          title: title,
-                          content: content,
-                          timestamp: timestamp);
-                      noteService.deleteTasks(noteToDelete);
-                    },
-                    icon:
-                        const Icon(Icons.delete, color: Colors.black, size: 20))
-              ],
-            )));
-      },
+      onTap: () => onTapFunction(context),
+      onLongPress: () => lpFunction(context),
       child: Container(
         decoration: BoxDecoration(
             color: Colors.grey[900],

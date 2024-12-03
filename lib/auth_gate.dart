@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/auth/firebase_auth.dart';
 import 'package:myapp/pages/home_page.dart';
 import 'package:myapp/pages/login_or_register.dart';
 
@@ -12,7 +11,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final BaseAuth auth = BaseAuth();
 
   @override
   void initState() {

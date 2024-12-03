@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/auth/notes_data.dart';
-import 'package:myapp/auth/notes_firestore.dart';
+import 'package:myapp/models/note_model.dart';
+import 'package:myapp/providers/db_provider.dart';
 import 'package:myapp/util/two_tiles.dart';
+import 'package:provider/provider.dart';
 
 class EditPage extends StatefulWidget {
   EditPage(
@@ -10,10 +12,8 @@ class EditPage extends StatefulWidget {
       required this.onNoteSaved,
       required this.titleController,
       required this.contentController,
-      required this.noteService,
       required this.noteId});
   final VoidCallback onNoteSaved;
-  final NoteService noteService;
   final FocusNode titleFocusNode = FocusNode();
   final FocusNode contentFocusNode = FocusNode();
   final TextEditingController titleController;
@@ -25,11 +25,29 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  final currentUser = FirebaseAuth.instance.currentUser;
   @override
   void dispose() {
     widget.contentController.dispose();
     widget.titleController.dispose();
     super.dispose();
+  }
+
+  Future<void> updateNotes() async {
+    Timestamp timestamp = Timestamp.now();
+    NoteModel notes = NoteModel(
+        id: widget.noteId,
+        title: widget.titleController.text,
+        content: widget.contentController.text,
+        timestamp: timestamp);
+    try {
+      await context
+          .read<DbProvider>()
+          .updateNotes(currentUser!.uid, notes.id, notes);
+      widget.onNoteSaved();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -59,30 +77,17 @@ class _EditPageState extends State<EditPage> {
                       },
                       icon: const Icon(Icons.close)),
                   IconButton(
-                      onPressed: () async {
-                        Timestamp timestamp = Timestamp.now();
-                        Notes notes = Notes(
-                            id: widget.noteId,
-                            title: widget.titleController.text,
-                            content: widget.contentController.text,
-                            timestamp: timestamp);
-                        try {
-                          await widget.noteService.updateNotes(notes);
-                          widget.onNoteSaved();
-                        } catch (e) {
-                          rethrow;
-                        }
-                      },
+                      onPressed: updateNotes,
                       icon: const Icon(Icons.save_alt_outlined)),
                 ],
               ),
-             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Divider(
-                height: 1,
-                color: Colors.grey[600],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Divider(
+                  height: 1,
+                  color: Colors.grey[600],
+                ),
               ),
-            ),
               Expanded(
                   child: SingleChildScrollView(
                 child: Padding(

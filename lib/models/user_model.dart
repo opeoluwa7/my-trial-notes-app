@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class UserData {
+class UserModel {
   final String firstName;
   final String lastName;
   final String email;
 
-  UserData(
+  UserModel(
       {required this.firstName, required this.lastName, required this.email});
 
-  factory UserData.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromMap(Map<String, dynamic> map) {
     debugPrint('Mapping Firestore Data: $map');
-    return UserData(
+    return UserModel(
       
       firstName: map['firstName'] ?? 'N/A',
       lastName: map['lastName'] ?? 'N/A',

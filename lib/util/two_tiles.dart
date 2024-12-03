@@ -17,6 +17,13 @@ class _TwoTilesState extends State<TwoTiles> {
   final FocusNode contentFocusNode = FocusNode();
 
   @override
+  void dispose() {
+    super.dispose();
+    titleFocusNode.dispose();
+    contentFocusNode.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
