@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/models/note_model.dart';
 import 'package:myapp/models/user_model.dart';
-import 'package:myapp/providers/base_auth.dart';
-import 'package:provider/provider.dart';
 
 class DbProvider extends ChangeNotifier {
   final users = FirebaseFirestore.instance.collection('users');
@@ -31,7 +29,7 @@ class DbProvider extends ChangeNotifier {
     return userInfo;
   }
 
-  Future deleteUserInfo(BuildContext context, String userId) async {
+  Future deleteUserInfo(String userId, Function deleteUserCallback) async {
     /*await users.doc(userId).collection('userInfo').doc('info').delete();
     await users.doc(userId).collection('notes').doc().delete();*/
 
@@ -51,9 +49,15 @@ class DbProvider extends ChangeNotifier {
 
     //this deletes the main document
     await users.doc(userId).delete();
-    
+
+    // this method is later called in the profile page where I assigned the delete user method
+    deleteUserCallback();
+
+    notifyListeners();
+
     //this deletes the user account from firebase authentication
-    await context.read<Auth>().deleteUser();
+    // I did not use this method because of the build synchronosly method, that does not mean it is wrong, it did not just apply to this situation in my case
+    //await context.read<Auth>().deleteUser();
   }
 
   //------------------------------------------------------------------------

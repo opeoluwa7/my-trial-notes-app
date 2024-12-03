@@ -42,7 +42,7 @@ class NoteTile extends StatelessWidget {
     context.read<DbProvider>().deleteNote(currentUser!.uid, noteId, note);
   }
 
-  void lpFunction(context)  {
+  void lpFunction(context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.grey[400],
@@ -64,32 +64,35 @@ class NoteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTapFunction(context),
-      onLongPress: () => lpFunction(context),
-      child: Container(
-        decoration: BoxDecoration(
-            color: Colors.grey[900],
-            border: Border.all(color: Colors.white),
-            borderRadius: BorderRadius.circular(8)),
-        child: IntrinsicHeight(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            child: Column(
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  content,
-                  maxLines: 10,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                ),
-              ],
-            ),
+        onTap: () => onTapFunction(context),
+        onLongPress: () => lpFunction(context),
+        child: _buildBody());
+  }
+
+  Widget _buildBody() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.grey[900],
+          border: Border.all(color: Colors.white),
+          borderRadius: BorderRadius.circular(8)),
+      child: IntrinsicHeight(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                content,
+                maxLines: 10,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+              ),
+            ],
           ),
         ),
       ),

@@ -19,15 +19,15 @@ class NotesPage extends StatelessWidget {
         title: const Text('Notes'),
         centerTitle: true,
       ),
-      body:  NotesStreamBody(),
+      body: NotesStreamBody(),
     );
   }
 }
 
 class NotesStreamBody extends StatelessWidget {
-   NotesStreamBody({super.key});
+  NotesStreamBody({super.key});
 
-    final currentUser = FirebaseAuth.instance.currentUser;
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +61,11 @@ class NotesStreamBody extends StatelessWidget {
               TextEditingController titleController =
                   TextEditingController(text: note.title);
 
-              return NoteTile(
-                note: note,
-                noteId: note.id,
-                contentController: contentController,
-                titleController: titleController,
-                index: index,
-                extent: (index % 5 + 1) * 100,
-                title: note.title,
-                content: note.content,
+              return _buildNoteTile(
+                note,
+                index,
+                titleController,
+                contentController,
               );
             },
           );
@@ -79,6 +75,19 @@ class NotesStreamBody extends StatelessWidget {
           );
         }
       },
+    );
+  }
+
+  Widget _buildNoteTile(NoteModel note, int index, TextEditingController titleController, TextEditingController contentController) {
+    return NoteTile(
+      note: note,
+      noteId: note.id,
+      contentController: contentController,
+      titleController: titleController,
+      index: index,
+      extent: (index % 5 + 1) * 100,
+      title: note.title,
+      content: note.content,
     );
   }
 }

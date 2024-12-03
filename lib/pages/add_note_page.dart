@@ -63,42 +63,44 @@ class _AddNotePageState extends State<AddNotePage> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       behavior: HitTestBehavior.opaque,
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              title: const Text(
-                'Add a new note',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              automaticallyImplyLeading: true,
-              centerTitle: true,
-              actions: [
-                IconButton(onPressed: onExit, icon: const Icon(Icons.close)),
-                IconButton(
-                    onPressed: onAddNote,
-                    icon: const Icon(Icons.save_alt_outlined)),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Divider(
-                height: 1,
-                color: Colors.grey[600],
-              ),
-            ),
-            Flexible(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: TwoTiles(
-                titleController: titleController,
-                contentController: contentController,
-              ),
-            )),
+      child: SafeArea(child: _buildBody()),
+    );
+  }
+
+  Widget _buildBody() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppBar(
+          title: const Text(
+            'Add a new note',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          automaticallyImplyLeading: true,
+          centerTitle: true,
+          actions: [
+            IconButton(onPressed: onExit, icon: const Icon(Icons.close)),
+            IconButton(
+                onPressed: onAddNote,
+                icon: const Icon(Icons.save_alt_outlined)),
           ],
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Divider(
+            height: 1,
+            color: Colors.grey[600],
+          ),
+        ),
+        Flexible(
+            child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: TwoTiles(
+            titleController: titleController,
+            contentController: contentController,
+          ),
+        )),
+      ],
     );
   }
 }

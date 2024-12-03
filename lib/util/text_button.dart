@@ -6,7 +6,9 @@ class MyTextButton extends StatelessWidget {
       this.onPressed,
       required this.text,
       required this.icon,
-      required this.size, required this.color, required this.iconColor});
+      required this.size,
+      required this.color,
+      required this.iconColor});
 
   final void Function()? onPressed;
   final String text;
@@ -18,31 +20,34 @@ class MyTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
-     // margin: const EdgeInsets.only(top: 10),
-      decoration: BoxDecoration(
-          border: Border.all(
-            width: 1,
-            color: Colors.grey,
-          ),
-          borderRadius: BorderRadius.circular(8)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          MaterialButton(
-            onPressed: onPressed,
-            child: Text(
-              text,
-              style: TextStyle(color: color),
+        height: 40,
+        // margin: const EdgeInsets.only(top: 10),
+        decoration: BoxDecoration(
+            border: Border.all(
+              width: 1,
+              color: Colors.grey,
             ),
+            borderRadius: BorderRadius.circular(8)),
+        child: _btnBody());
+  }
+
+  Widget _btnBody() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        MaterialButton(
+          onPressed: onPressed,
+          child: Text(
+            text,
+            style: TextStyle(color: color),
           ),
-          Icon(
-            icon,
-            size: size,
-            color: iconColor,
-          ),
-        ],
-      ),
+        ),
+        Icon(
+          icon,
+          size: size,
+          color: iconColor,
+        ),
+      ],
     );
   }
 }

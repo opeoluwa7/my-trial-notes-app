@@ -1,21 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:myapp/models/user_model.dart';
-import 'package:myapp/providers/db_provider.dart';
-import 'package:provider/provider.dart';
 
 class Auth extends ChangeNotifier {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final currentUser = FirebaseAuth.instance.currentUser;
 
   //to create user
-  Future createUser(String email, String password, String firstName,
-      String lastName, BuildContext context) async {
+  Future createUser(
+    String email,
+    String password,
+    String firstName,
+    String lastName,
+    Function onCreateUser
+  ) async {
     try {
       //create user in firebase auth
       await auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+          email: email, password: password,);
 
       //create userdata object
       UserModel userData =
@@ -27,17 +29,11 @@ class Auth extends ChangeNotifier {
       //await firestoreService.addUser(userData);
       //using add generates a new id which is not what is intended in this app
       // and so using set helps specify
-      await context
-          .read<DbProvider>()
-          .users
-          .doc(uid)
-          .collection('userInfo')
-          .doc('info')
-          .set(userData.toMap());
+      onCreateUser(userData, uid);
 
       notifyListeners();
     } on FirebaseAuthException catch (e) {
-      print('Process failed because $e');
+      debugPrint('Process failed because $e');
       rethrow;
     }
   }

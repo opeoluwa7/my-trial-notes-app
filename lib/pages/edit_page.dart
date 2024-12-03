@@ -59,49 +59,51 @@ class _EditPageState extends State<EditPage> {
           FocusManager.instance.primaryFocus?.unfocus();
         },
         behavior: HitTestBehavior.opaque,
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppBar(
-                title: const Text(
-                  'Edit note',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                automaticallyImplyLeading: true,
-                centerTitle: true,
-                actions: [
-                  IconButton(
-                      onPressed: () {
-                        widget.onNoteSaved();
-                      },
-                      icon: const Icon(Icons.close)),
-                  IconButton(
-                      onPressed: updateNotes,
-                      icon: const Icon(Icons.save_alt_outlined)),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Divider(
-                  height: 1,
-                  color: Colors.grey[600],
-                ),
-              ),
-              Expanded(
-                  child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: TwoTiles(
-                    titleController: widget.titleController,
-                    contentController: widget.contentController,
-                  ),
-                ),
-              )),
-            ],
+        child: SafeArea(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppBar(
+          title: const Text(
+            'Edit note',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          automaticallyImplyLeading: true,
+          centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  widget.onNoteSaved();
+                },
+                icon: const Icon(Icons.close)),
+            IconButton(
+                onPressed: updateNotes,
+                icon: const Icon(Icons.save_alt_outlined)),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Divider(
+            height: 1,
+            color: Colors.grey[600],
           ),
         ),
-      ),
+        Expanded(
+            child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: TwoTiles(
+              titleController: widget.titleController,
+              contentController: widget.contentController,
+            ),
+          ),
+        )),
+      ],
     );
   }
 }

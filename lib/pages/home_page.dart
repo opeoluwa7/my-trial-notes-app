@@ -26,7 +26,6 @@ class _HomeBodyState extends State<HomeBody> {
   final PageController pageController = PageController();
   int selectedIndex = 0;
   List<Widget> pages = [];
-  
 
   @override
   void initState() {
@@ -53,7 +52,16 @@ class _HomeBodyState extends State<HomeBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
+      body: _buildPage(),
+      bottomNavigationBar: MyBottomNav(
+        selectedIndex: selectedIndex,
+        controller: pageController,
+      ),
+    );
+  }
+
+  Widget _buildPage() {
+    return PageView(
         controller: pageController,
         onPageChanged: (index) {
           setState(() {
@@ -61,12 +69,7 @@ class _HomeBodyState extends State<HomeBody> {
           });
         },
         children: pages,
-      ),
-      bottomNavigationBar: MyBottomNav(
-        selectedIndex: selectedIndex,
-        controller: pageController,
-      ),
-    );
+      );
   }
 }
 

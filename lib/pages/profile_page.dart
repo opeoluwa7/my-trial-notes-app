@@ -62,8 +62,10 @@ class _ProfileFutureBodyState extends State<ProfileFutureBody> {
     }
   }
 
-  Future<void> deleteUserAcc() async {
-    await context.read<DbProvider>().deleteUserInfo(context, currentUser.uid);
+  Future<void> deleteUser() async {
+    await context.read<DbProvider>().deleteUserInfo(currentUser.uid, () {
+      context.read<Auth>().deleteUser();
+    });
   }
 
   Future<void> deleteAccount() async {
@@ -72,7 +74,7 @@ class _ProfileFutureBodyState extends State<ProfileFutureBody> {
       builder: (context) => DeleteDialog(
         onPressed: () {
           Navigator.pop(context);
-          deleteUserAcc();
+          deleteUser();
         },
       ),
     );
@@ -101,51 +103,58 @@ class _ProfileFutureBodyState extends State<ProfileFutureBody> {
           final email = user['email'] ?? 'N/A';
 
           return Scaffold(
-            body: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              children: [
-                const SizedBox(
-                  height: 30,
-                ),
-                Icon(
-                  Icons.account_circle_rounded,
-                  size: 100,
-                  color: Colors.grey[400],
-                ),
-                UserTiles(text: 'FirstName: $firstName'),
-                UserTiles(text: 'LastName: $lastName'),
-                UserTiles(text: 'Email:        $email'),
-                const SizedBox(
-                  height: 20,
-                ),
-                MyTextButton(
-                  color: Colors.white,
-                  iconColor: Colors.white,
-                  text: 'Sign Out',
-                  onPressed: signUserOut,
-                  icon: Icons.login_rounded,
-                  size: 16,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                MyTextButton(
-                  color: Colors.red,
-                  iconColor: Colors.red,
-                  text: 'Delete account',
-                  onPressed: deleteAccount,
-                  icon: Icons.close,
-                  size: 24,
-                ),
-              ],
-            ),
-          );
+              body: _buildBody(
+            firstName,
+            lastName,
+            email,
+          ));
         } else {
           return const Center(
             child: Text('No user found'),
           );
         }
       },
+    );
+  }
+
+  Widget _buildBody(String firstName, String lastName, String email) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      children: [
+        const SizedBox(
+          height: 30,
+        ),
+        Icon(
+          Icons.account_circle_rounded,
+          size: 100,
+          color: Colors.grey[400],
+        ),
+        UserTiles(text: 'FirstName: $firstName'),
+        UserTiles(text: 'LastName: $lastName'),
+        UserTiles(text: 'Email:        $email'),
+        const SizedBox(
+          height: 20,
+        ),
+        MyTextButton(
+          color: Colors.white,
+          iconColor: Colors.white,
+          text: 'Sign Out',
+          onPressed: signUserOut,
+          icon: Icons.login_rounded,
+          size: 16,
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        MyTextButton(
+          color: Colors.red,
+          iconColor: Colors.red,
+          text: 'Delete account',
+          onPressed: deleteAccount,
+          icon: Icons.close,
+          size: 24,
+        ),
+      ],
     );
   }
 }

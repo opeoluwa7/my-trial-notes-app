@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/pages/home_page.dart';
 import 'package:myapp/providers/base_auth.dart';
+import 'package:myapp/providers/db_provider.dart';
 import 'package:myapp/util/my_button.dart';
 import 'package:myapp/util/my_text_field.dart';
 import 'package:provider/provider.dart';
@@ -61,9 +62,15 @@ class _RegisterBodyState extends State<RegisterBody> {
     super.dispose();
   }
 
+  // to display the error messages in a snackbar
   _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // to display the catch error (e)
+  errorBar() {
+    _showErrorSnackBar(context, 'Something went wrong, Please try again');
   }
 
   Future<void> signUpUser() async {
@@ -99,7 +106,15 @@ class _RegisterBodyState extends State<RegisterBody> {
       );
       await context
           .read<Auth>()
-          .createUser(email, password, firstName, lastName, context);
+          .createUser(email, password, firstName, lastName, (uid, userData) {
+            context
+          .read<DbProvider>()
+          .users
+          .doc(uid)
+          .collection('userInfo')
+          .doc('info')
+          .set(userData.toMap());
+          });
 
       if (mounted) {
         Navigator.pop(context);
@@ -110,11 +125,12 @@ class _RegisterBodyState extends State<RegisterBody> {
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
-      errorMessage = context.read<Auth>().handleAuthError(e.code);
-      _showErrorSnackBar(context, errorMessage);
+      if (mounted) {
+        errorMessage = context.read<Auth>().handleAuthError(e.code);
+        _showErrorSnackBar(context, errorMessage);
+      }
     } catch (e) {
-      return _showErrorSnackBar(
-          context, 'Something went wrong, Please try again');
+      return errorBar();
     }
   }
 
@@ -123,7 +139,14 @@ class _RegisterBodyState extends State<RegisterBody> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-          child: Column(
+          child: columnBody()
+        ),
+      ),
+    );
+  }
+
+  Widget columnBody() {
+    return  Column(
             children: [
               const SizedBox(height: 50),
               //header text
@@ -210,11 +233,9 @@ class _RegisterBodyState extends State<RegisterBody> {
                     ],
                   ),
                 ),
-              )
+              ),
             ],
-          ),
-        ),
-      ),
-    );
+          );
+
   }
 }

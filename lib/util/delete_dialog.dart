@@ -9,34 +9,40 @@ class DeleteDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      content: Container(child: _buildBody(
+        context
+      )),
+    );
+  }
+
+  void clearDialog(context) {
+    Navigator.pop(context);
+  }
+
+  Widget _buildBody(context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('Are you sure you want to delete your account?'),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text('Are you sure you want to delete your account?'),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-                TextButton(
-                    onPressed: onPressed,
-                    child: const Text(
-                      'Delete',
-                      style: TextStyle(color: Colors.red),
-                    ))
-              ],
-            )
+            TextButton(
+                onPressed: () => clearDialog(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white),
+                )),
+            TextButton(
+                onPressed: onPressed,
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ))
           ],
-        ),
-      ),
+        )
+      ],
     );
   }
 }
