@@ -27,18 +27,20 @@ class _HomeBodyState extends State<HomeBody> {
   int selectedIndex = 0;
   List<Widget> pages = [];
 
+  void _onNoteSaved() {
+    pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     pages = [
       const NotesPage(),
-      AddNotePage(onNoteSaved: () {
-        setState(() {
-          pageController.animateToPage(0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut);
-        });
-      }),
+      AddNotePage(onNoteSaved: _onNoteSaved),
       const ProfilePage(),
     ];
   }
@@ -60,16 +62,16 @@ class _HomeBodyState extends State<HomeBody> {
     );
   }
 
+  void _onPageChanged(index) {
+    selectedIndex = index;
+  }
+
   Widget _buildPage() {
     return PageView(
-        controller: pageController,
-        onPageChanged: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        children: pages,
-      );
+      controller: pageController,
+      onPageChanged: _onPageChanged,
+      children: pages,
+    );
   }
 }
 
@@ -87,9 +89,7 @@ class MyBottomNav extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         iconSize: 28,
         currentIndex: selectedIndex,
-        onTap: (int index) {
-          controller.jumpToPage(index);
-        },
+        onTap: _onTapFunction,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -99,5 +99,9 @@ class MyBottomNav extends StatelessWidget {
           BottomNavigationBarItem(
               icon: Icon(Icons.account_circle_outlined), label: ''),
         ]);
+  }
+
+  void _onTapFunction(int index) {
+    controller.jumpToPage(index);
   }
 }
