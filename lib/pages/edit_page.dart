@@ -68,24 +68,7 @@ class _EditPageState extends State<EditPage> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppBar(
-          title: const Text(
-            'Edit note',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          automaticallyImplyLeading: true,
-          centerTitle: true,
-          actions: [
-            IconButton(
-                onPressed: () {
-                  widget.onNoteSaved();
-                },
-                icon: const Icon(Icons.close)),
-            IconButton(
-                onPressed: updateNotes,
-                icon: const Icon(Icons.save_alt_outlined)),
-          ],
-        ),
+        _appBar(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Divider(
@@ -93,17 +76,42 @@ class _EditPageState extends State<EditPage> {
             color: Colors.grey[600],
           ),
         ),
-        Expanded(
-            child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: TwoTiles(
-              titleController: widget.titleController,
-              contentController: widget.contentController,
-            ),
-          ),
-        )),
+        _noteBody()
       ],
+    );
+  }
+
+  Widget _appBar() {
+    return AppBar(
+      title: const Text(
+        'Edit note',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      automaticallyImplyLeading: true,
+      centerTitle: true,
+      actions: [
+        IconButton(
+            onPressed: () {
+              widget.onNoteSaved();
+            },
+            icon: const Icon(Icons.close)),
+        IconButton(
+            onPressed: updateNotes, icon: const Icon(Icons.save_alt_outlined)),
+      ],
+    );
+  }
+
+  Widget _noteBody() {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: TwoTiles(
+            titleController: widget.titleController,
+            contentController: widget.contentController,
+          ),
+        ),
+      ),
     );
   }
 }

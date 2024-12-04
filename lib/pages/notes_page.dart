@@ -24,28 +24,38 @@ class NotesPage extends StatelessWidget {
   }
 }
 
-class NotesStreamBody extends StatelessWidget {
-  NotesStreamBody({super.key});
+class NotesStreamBody extends StatefulWidget {
+  const NotesStreamBody({super.key});
 
-  final currentUser = FirebaseAuth.instance.currentUser;
+  @override
+  State<NotesStreamBody> createState() => _NotesStreamBodyState();
+}
+
+class _NotesStreamBodyState extends State<NotesStreamBody> {
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    userId = currentUser!.uid;
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: context.watch<DbProvider>().fetchNotes(currentUser!.uid),
+      stream: context.watch<DbProvider>().fetchNotes(userId!),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('There seems to be an error'),
-          );
-        }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
         if (snapshot.hasData) {
-          List<QueryDocumentSnapshot> notes = snapshot.data!.docs;
+          List<NoteModel> notes = snapshot.data!.docs
+              .map((doc) =>
+                  NoteModel.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
           return MasonryGridView.count(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             crossAxisCount: 2,
@@ -54,12 +64,11 @@ class NotesStreamBody extends StatelessWidget {
             itemCount: notes.length,
             itemBuilder: (context, index) {
               var note = NoteModel.fromMap(
-                notes[index].data() as Map<String, dynamic>,
+                notes[index] as Map<String, dynamic>,
               );
-              TextEditingController contentController =
+              final contentController =
                   TextEditingController(text: note.content);
-              TextEditingController titleController =
-                  TextEditingController(text: note.title);
+              final titleController = TextEditingController(text: note.title);
 
               return _buildNoteTile(
                 note,
@@ -78,7 +87,11 @@ class NotesStreamBody extends StatelessWidget {
     );
   }
 
-  Widget _buildNoteTile(NoteModel note, int index, TextEditingController titleController, TextEditingController contentController) {
+  Widget _buildNoteTile(
+      NoteModel note,
+      int index,
+      TextEditingController titleController,
+      TextEditingController contentController) {
     return NoteTile(
       note: note,
       noteId: note.id,

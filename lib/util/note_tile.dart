@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/models/note_model.dart';
-import 'package:myapp/pages/edit_page.dart';
 import 'package:myapp/providers/db_provider.dart';
 
 class NoteTile extends StatelessWidget {
@@ -24,18 +23,14 @@ class NoteTile extends StatelessWidget {
   final currentUser = FirebaseAuth.instance.currentUser;
 
   Future onTapFunction(context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => EditPage(
-          noteId: noteId,
-          contentController: contentController,
-          onNoteSaved: () {
-            Navigator.pop(context);
-          },
-          titleController: titleController,
-        ),
-      ),
-    );
+    await Navigator.of(context).pushNamed('/edit', arguments: {
+      'titleController': titleController,
+      'contentController': contentController,
+      'noteId': noteId,
+      'onNoteSaved': () {
+        Navigator.pop(context);
+      }
+    });
   }
 
   void deleteNote(context) {
@@ -49,7 +44,7 @@ class NoteTile extends StatelessWidget {
         content: Row(
           children: [
             const Text(
-              'Files deleted will be permanently removed',
+              'Files deleted will be permanently removed, Are you sure?',
               style: TextStyle(color: Colors.black),
             ),
             IconButton(

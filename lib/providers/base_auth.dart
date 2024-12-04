@@ -4,34 +4,32 @@ import 'package:myapp/models/user_model.dart';
 
 class Auth extends ChangeNotifier {
   final FirebaseAuth auth = FirebaseAuth.instance;
-  final currentUser = FirebaseAuth.instance.currentUser;
 
   //to create user
-  Future createUser(
-    String email,
-    String password,
-    String firstName,
-    String lastName,
-    Function onCreateUser
-  ) async {
+  Future<void> createUser(String email, String password, String firstName,
+      String lastName, Function onCreateUser) async {
     try {
       //create user in firebase auth
-      await auth.createUserWithEmailAndPassword(
-          email: email, password: password,);
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      //create userdata object
-      UserModel userData =
-          UserModel(email: email, firstName: firstName, lastName: lastName);
+      final uid = userCredential.user?.uid;
 
-      final uid = currentUser?.uid;
-
-      //add user profile data to firestore database
-      //await firestoreService.addUser(userData);
-      //using add generates a new id which is not what is intended in this app
-      // and so using set helps specify
-      onCreateUser(userData, uid);
-
-      notifyListeners();
+      if (uid != null) {
+        //create userdata object
+        UserModel userData =
+            UserModel(email: email, firstName: firstName, lastName: lastName);
+        //add user profile data to firestore database
+        onCreateUser(userData, uid);
+        notifyListeners();
+      } else {
+        throw FirebaseAuthException(
+          message: 'User creation failed. No UID generated.',
+          code: 'no-uid',
+        );
+      }
     } on FirebaseAuthException catch (e) {
       debugPrint('Process failed because $e');
       rethrow;
@@ -39,7 +37,10 @@ class Auth extends ChangeNotifier {
   }
 
   //to sign in user
-  Future<UserCredential> signIn(String email, String password) async {
+  Future<UserCredential?> signIn(
+    String email,
+    String password,
+  ) async {
     try {
       UserCredential userCredential = await auth.signInWithEmailAndPassword(
           email: email, password: password);
@@ -85,8 +86,11 @@ class Auth extends ChangeNotifier {
         return 'Too many requests. Try again later.';
       case 'network-request-failed':
         return 'Network request failed';
+      case 'channel-error':
+        return 'Channel Error';
       default:
         return 'Something went wrong';
     }
   }
+
 }

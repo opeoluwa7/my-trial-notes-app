@@ -42,6 +42,7 @@ class _AddNotePageState extends State<AddNotePage> {
         content: contentController.text,
         timestamp: timestamp);
     try {
+      FocusScope.of(context).unfocus();
       await context.read<DbProvider>().createNote(notes, currentUser!.uid);
       titleController.clear();
       contentController.clear();
@@ -71,20 +72,7 @@ class _AddNotePageState extends State<AddNotePage> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppBar(
-          title: const Text(
-            'Add a new note',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          automaticallyImplyLeading: true,
-          centerTitle: true,
-          actions: [
-            IconButton(onPressed: onExit, icon: const Icon(Icons.close)),
-            IconButton(
-                onPressed: onAddNote,
-                icon: const Icon(Icons.save_alt_outlined)),
-          ],
-        ),
+        _appBar(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Divider(
@@ -92,15 +80,35 @@ class _AddNotePageState extends State<AddNotePage> {
             color: Colors.grey[600],
           ),
         ),
-        Flexible(
-            child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: TwoTiles(
-            titleController: titleController,
-            contentController: contentController,
-          ),
-        )),
+        _twoTiles()
       ],
     );
+  }
+
+  Widget _appBar() {
+    return AppBar(
+      title: const Text(
+        'Add a new note',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      automaticallyImplyLeading: true,
+      centerTitle: true,
+      actions: [
+        IconButton(onPressed: onExit, icon: const Icon(Icons.close)),
+        IconButton(
+            onPressed: onAddNote, icon: const Icon(Icons.save_alt_outlined)),
+      ],
+    );
+  }
+
+  Widget _twoTiles() {
+    return Flexible(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: TwoTiles(
+        titleController: titleController,
+        contentController: contentController,
+      ),
+    ));
   }
 }

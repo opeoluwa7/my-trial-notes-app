@@ -2,7 +2,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/pages/home_page.dart';
 import 'package:myapp/providers/base_auth.dart';
 import 'package:myapp/util/my_button.dart';
 import 'package:myapp/util/my_text_field.dart';
@@ -54,7 +53,10 @@ class _LoginBodyState extends State<LoginBody> {
     debugPrint("Error Dialog: $message");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.red,
       ),
@@ -64,29 +66,49 @@ class _LoginBodyState extends State<LoginBody> {
   void _signInUser() async {
     String email = emailController.text;
     String password = passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      _showErrorSnackBar(context, 'All fields are required');
-    }
-    if (password.length < 6) {
-      _showErrorSnackBar(context, 'Password must be at least 6 characters');
-    }
+
     try {
-      showDialog(
-          context: context,
-          builder: (context) => const Center(
-                child: CircularProgressIndicator.adaptive(),
-              ));
-      context.read<Auth>().signIn(email, password);
-      if (mounted) {
-        Navigator.pop(context);
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const HomePage()));
-      }
+      _cpiDialog();
+      await _signInUserMethod(context, email, password);
+      _successfulLogin();
     } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      errorMessage = context.read<Auth>().handleAuthError(e.code);
-      _showErrorSnackBar(context, errorMessage);
+      _firebaseError(e);
+    } catch (e) {
+      _genericError();
     }
+  }
+
+  void _successfulLogin() {
+    Navigator.pop(context);
+    Navigator.pushReplacementNamed(context, '/home');
+  }
+
+  void _cpiDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
+  }
+
+  Future<void> _signInUserMethod(context, String email, String password) async {
+    await context.read<Auth>().signIn(
+          email,
+          password,
+        );
+  }
+
+  void _firebaseError(e) {
+    String errorMessage;
+    Navigator.pop(context);
+    errorMessage = context.read<Auth>().handleAuthError(e.code);
+    _showErrorSnackBar(context, errorMessage);
+  }
+
+  void _genericError() {
+    Navigator.pop(context);
+    _showErrorSnackBar(context, 'Something went wrong, Please try again');
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/auth_gate.dart';
 import 'package:myapp/providers/base_auth.dart';
 import 'package:myapp/providers/db_provider.dart';
+import 'package:myapp/routes/route_generator.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -10,12 +11,10 @@ void main() async {
 
   await Firebase.initializeApp();
   runApp(
-    MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => Auth()),
-          ChangeNotifierProvider(create: (_) => DbProvider()),
-        ],
-        child: const MyApp()),
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => Auth()),
+      ChangeNotifierProvider(create: (_) => DbProvider()),
+    ], child: const MyApp()),
   );
 }
 
@@ -30,7 +29,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
       ),
-      home: const MainPage(),
+      home: const AuthGate(),
+      initialRoute: '/',
+      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }

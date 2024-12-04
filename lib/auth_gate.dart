@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:myapp/pages/home_page.dart';
 import 'package:myapp/pages/login_or_register.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<AuthGate> createState() => _AuthGateState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _AuthGateState extends State<AuthGate> {
 
   @override
   void initState() {

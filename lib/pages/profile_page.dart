@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/auth_gate.dart';
 import 'package:myapp/providers/base_auth.dart';
 import 'package:myapp/providers/db_provider.dart';
 import 'package:myapp/util/delete_dialog.dart';
@@ -42,8 +41,7 @@ class _ProfileFutureBodyState extends State<ProfileFutureBody> {
   Future<void> signUserOut() async {
     await context.read<Auth>().signOut();
     if (mounted) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const MainPage()));
+      Navigator.pushReplacementNamed(context, '/');
     }
   }
 

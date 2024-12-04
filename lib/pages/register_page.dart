@@ -1,8 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/pages/home_page.dart';
 import 'package:myapp/providers/base_auth.dart';
 import 'package:myapp/providers/db_provider.dart';
 import 'package:myapp/util/my_button.dart';
@@ -64,16 +61,19 @@ class _RegisterBodyState extends State<RegisterBody> {
 
   // to display the error messages in a snackbar
   _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
-  // to display the catch error (e)
-  errorBar() {
-    _showErrorSnackBar(context, 'Something went wrong, Please try again');
-  }
-
-  Future<void> signUpUser() async {
+  Future<void> signUpUser(BuildContext context) async {
     String firstName;
     String lastName;
     String confirmPassword;
@@ -83,159 +83,186 @@ class _RegisterBodyState extends State<RegisterBody> {
     lastName = lastNameController.text;
     confirmPassword = confirmPasswordController.text;
 
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      return _showErrorSnackBar(context, 'All fields are required');
+    }
+    if (password.length < 6) {
+      return _showErrorSnackBar(
+          context, 'Password must be at least 6 characters');
+    }
+    if (password != confirmPassword) {
+      return _showErrorSnackBar(context, 'Passwords do not match');
+    }
+
     try {
-      if (firstName.isEmpty ||
-          lastName.isEmpty ||
-          email.isEmpty ||
-          password.isEmpty ||
-          confirmPassword.isEmpty) {
-        return _showErrorSnackBar(context, 'All fields are required');
-      }
-      if (password.length < 6) {
-        return _showErrorSnackBar(
-            context, 'Password must be at least 6 characters');
-      }
-      if (password != confirmPassword) {
-        return _showErrorSnackBar(context, 'Passwords do not match');
-      }
-      showDialog(
-        context: context,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator.adaptive(),
-        ),
-      );
-      await context
-          .read<Auth>()
-          .createUser(email, password, firstName, lastName, (uid, userData) {
-            context
+      _cpiDialog();
+      await _createUserMethod(context, email, password, firstName, lastName);
+      _successfulSignUp();
+    } on FirebaseAuthException catch (e) {
+      _firebaseError(e);
+    } catch (e) {
+      _genericError();
+    }
+  }
+
+  void _successfulSignUp() {
+    if (mounted) {
+      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  void _cpiDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
+  }
+
+  // this creates the user in firebase auth and stores the user data in firestore
+  Future<void> _createUserMethod(
+    context,
+    String email,
+    String password,
+    String firstName,
+    String lastName,
+  ) async {
+    // auth
+    await context.read<Auth>().createUser(email, password, firstName, lastName,
+        (userData, uid) {
+      //await firestoreService.addUser(userData);
+      //using .add() generates a new id which is not what is intended in this app
+      // and so using set helps specify
+
+      //firestore db
+      context
           .read<DbProvider>()
           .users
           .doc(uid)
           .collection('userInfo')
           .doc('info')
           .set(userData.toMap());
-          });
+    });
+  }
 
-      if (mounted) {
-        Navigator.pop(context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      if (mounted) {
-        errorMessage = context.read<Auth>().handleAuthError(e.code);
-        _showErrorSnackBar(context, errorMessage);
-      }
-    } catch (e) {
-      return errorBar();
-    }
+  // this displays firebase auth errors
+  void _firebaseError(e) {
+    String errorMessage;
+    Navigator.pop(context);
+    errorMessage = context.read<Auth>().handleAuthError(e.code);
+    _showErrorSnackBar(context, errorMessage);
+  }
+
+  // this displays generic errors like network connectivity
+  void _genericError() {
+    Navigator.pop(context);
+    _showErrorSnackBar(context, 'Something went wrong, Please try again');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Center(
-          child: columnBody()
-        ),
+        child: Center(child: columnBody()),
       ),
     );
   }
 
   Widget columnBody() {
-    return  Column(
-            children: [
-              const SizedBox(height: 50),
-              //header text
-              const Text(
-                'Welcome!',
-                style: TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 20),
-              //text
-              const Text(
-                'Join Us',
-                style: TextStyle(fontSize: 24),
-              ),
-              const SizedBox(height: 50),
-              //First name
-              MyTextField(
-                focusNode: firstNameFocusNode,
-                controller: firstNameController,
-                hintText: 'Enter your first name...',
-                labelText: 'First Name',
-                obscureText: false,
-              ),
-              const SizedBox(height: 10),
-              //Last name
-              MyTextField(
-                focusNode: lastNameFocusNode,
-                controller: lastNameController,
-                hintText: 'Enter your last name...',
-                labelText: 'Last Name',
-                obscureText: false,
-              ),
-              const SizedBox(height: 10),
-              //Email
-              MyTextField(
-                focusNode: emailFocusNode,
-                controller: emailController,
-                hintText: 'Enter your email...',
-                labelText: 'Email',
-                obscureText: false,
-              ),
-              const SizedBox(height: 10),
-              //Password
-              MyTextField(
-                focusNode: passwordFocusNode,
-                controller: passwordController,
-                hintText: 'Enter your password...',
-                labelText: 'Password',
-                obscureText: true,
-              ),
-              const SizedBox(height: 10),
-              //Confirm Password
-              MyTextField(
-                focusNode: confirmPasswordFocusNode,
-                controller: confirmPasswordController,
-                hintText: 'Confirm your password...',
-                labelText: 'Confirm Password',
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
+    return Column(
+      children: [
+        const SizedBox(height: 50),
+        //header text
+        const Text(
+          'Welcome!',
+          style: TextStyle(fontSize: 20),
+        ),
+        const SizedBox(height: 20),
+        //text
+        const Text(
+          'Join Us',
+          style: TextStyle(fontSize: 24),
+        ),
+        const SizedBox(height: 50),
+        //First name
+        MyTextField(
+          focusNode: firstNameFocusNode,
+          controller: firstNameController,
+          hintText: 'Enter your first name...',
+          labelText: 'First Name',
+          obscureText: false,
+        ),
+        const SizedBox(height: 10),
+        //Last name
+        MyTextField(
+          focusNode: lastNameFocusNode,
+          controller: lastNameController,
+          hintText: 'Enter your last name...',
+          labelText: 'Last Name',
+          obscureText: false,
+        ),
+        const SizedBox(height: 10),
+        //Email
+        MyTextField(
+          focusNode: emailFocusNode,
+          controller: emailController,
+          hintText: 'Enter your email...',
+          labelText: 'Email',
+          obscureText: false,
+        ),
+        const SizedBox(height: 10),
+        //Password
+        MyTextField(
+          focusNode: passwordFocusNode,
+          controller: passwordController,
+          hintText: 'Enter your password...',
+          labelText: 'Password',
+          obscureText: true,
+        ),
+        const SizedBox(height: 10),
+        //Confirm Password
+        MyTextField(
+          focusNode: confirmPasswordFocusNode,
+          controller: confirmPasswordController,
+          hintText: 'Confirm your password...',
+          labelText: 'Confirm Password',
+          obscureText: true,
+        ),
+        const SizedBox(height: 30),
 
-              //Sign up button
-              MyButton(
-                color: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 1),
-                textColor: Colors.black,
-                onPressed: signUpUser,
-                text: 'Sign Up',
-              ),
-              const SizedBox(height: 20),
-              //go back to login
-              GestureDetector(
-                onTap: widget.tooglePages,
-                child: RichText(
-                  text: const TextSpan(
-                    children: [
-                      TextSpan(text: 'Already a member?'),
-                      TextSpan(text: '    '),
-                      TextSpan(
-                        text: 'Log In',
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-
+        //Sign up button
+        MyButton(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 1),
+          textColor: Colors.black,
+          onPressed: () => signUpUser(context),
+          text: 'Sign Up',
+        ),
+        const SizedBox(height: 20),
+        //go back to login
+        GestureDetector(
+          onTap: widget.tooglePages,
+          child: RichText(
+            text: const TextSpan(
+              children: [
+                TextSpan(text: 'Already a member?'),
+                TextSpan(text: '    '),
+                TextSpan(
+                  text: 'Log In',
+                  style: TextStyle(
+                      color: Colors.blue, fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
